@@ -46,7 +46,7 @@ export type AimedBossVolleyInput = {
   travelMs: number;
 };
 
-export const BOSS_AIMED_TRAVEL_MS = 1_000;
+export const BOSS_AIMED_TRAVEL_MS = 500;
 export const BOSS_AIMED_VOLLEY_INTERVAL_MS = 1_000;
 
 export const shouldBossFire = (state: BossFireState): boolean => {
@@ -78,19 +78,19 @@ export const createAimedBossVolley = ({
 }: AimedBossVolleyInput): AimedProjectilePlan[] => {
   const directionSets = [
     [
+      { x: -162, y: -44 },
       { x: 0, y: 58 },
-      { x: -122, y: 92 },
-      { x: 122, y: 92 }
+      { x: 162, y: -44 }
     ],
     [
-      { x: -148, y: 36 },
-      { x: 0, y: 74 },
-      { x: 148, y: 36 }
+      { x: -168, y: 164 },
+      { x: 0, y: 64 },
+      { x: 168, y: 164 }
     ],
     [
-      { x: -92, y: 28 },
-      { x: 92, y: 28 },
-      { x: 0, y: 118 }
+      { x: -132, y: 24 },
+      { x: 132, y: 24 },
+      { x: 0, y: 202 }
     ]
   ];
   const offsets = directionSets[volleyIndex % directionSets.length];

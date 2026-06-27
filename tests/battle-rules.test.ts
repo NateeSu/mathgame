@@ -48,21 +48,21 @@ describe("BattleRules", () => {
       startY: 240,
       targetX: 220,
       targetY: 640,
-      travelMs: 1_000
+      travelMs: 500
     });
 
-    expect(80 + velocity.velocityX).toBe(220);
-    expect(240 + velocity.velocityY).toBe(640);
+    expect(80 + velocity.velocityX * 0.5).toBe(220);
+    expect(240 + velocity.velocityY * 0.5).toBe(640);
   });
 
-  test("aimed boss volleys approach the player from changing directions", () => {
+  test("aimed boss volleys attack from arena directions instead of clustering around the boss", () => {
     const first = createAimedBossVolley({
       volleyIndex: 0,
       bossX: 195,
       bossY: 236,
       targetX: 190,
       targetY: 636,
-      travelMs: 1_000
+      travelMs: 500
     });
     const second = createAimedBossVolley({
       volleyIndex: 1,
@@ -70,15 +70,17 @@ describe("BattleRules", () => {
       bossY: 236,
       targetX: 190,
       targetY: 636,
-      travelMs: 1_000
+      travelMs: 500
     });
 
     expect(first).toHaveLength(3);
     expect(second).toHaveLength(3);
     expect(first.map((shot) => shot.startX)).not.toEqual(second.map((shot) => shot.startX));
-    first.forEach((shot) => {
-      expect(Math.round(shot.startX + shot.velocityX)).toBe(190);
-      expect(Math.round(shot.startY + shot.velocityY)).toBe(636);
+    expect(first.some((shot) => Math.abs(shot.startX - 195) > 120)).toBe(true);
+    expect(second.some((shot) => shot.startY > 340)).toBe(true);
+    [...first, ...second].forEach((shot) => {
+      expect(Math.round(shot.startX + shot.velocityX * 0.5)).toBe(190);
+      expect(Math.round(shot.startY + shot.velocityY * 0.5)).toBe(636);
     });
   });
 });

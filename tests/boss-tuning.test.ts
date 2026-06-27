@@ -3,8 +3,8 @@ import { BOSSES } from "../src/game/constants";
 import { BOSS_AIMED_TRAVEL_MS, BOSS_AIMED_VOLLEY_INTERVAL_MS } from "../src/game/systems/BattleRules";
 
 describe("boss tuning", () => {
-  test("all bosses use one-second aimed projectile travel", () => {
-    expect(BOSS_AIMED_TRAVEL_MS).toBe(1_000);
+  test("boss projectiles use fast aimed travel", () => {
+    expect(BOSS_AIMED_TRAVEL_MS).toBe(500);
   });
 
   test("all bosses launch aimed volleys every second", () => {
