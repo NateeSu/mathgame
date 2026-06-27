@@ -1,12 +1,17 @@
 import { describe, expect, test } from "vitest";
 import { BOSSES } from "../src/game/constants";
+import { BOSS_AIMED_TRAVEL_MS, BOSS_AIMED_VOLLEY_INTERVAL_MS } from "../src/game/systems/BattleRules";
 
 describe("boss tuning", () => {
-  test("boss projectiles are fast enough to pressure the player", () => {
-    expect(BOSSES.map((boss) => boss.projectileSpeed)).toEqual([620, 760, 920]);
+  test("all bosses use one-second aimed projectile travel", () => {
+    expect(BOSS_AIMED_TRAVEL_MS).toBe(1_000);
   });
 
-  test("stronger bosses attack more frequently", () => {
-    expect(BOSSES.map((boss) => boss.fireRateMs)).toEqual([760, 600, 460]);
+  test("all bosses launch aimed volleys every second", () => {
+    expect(BOSS_AIMED_VOLLEY_INTERVAL_MS).toBe(1_000);
+  });
+
+  test("boss configs still provide projectile art for each monster", () => {
+    expect(BOSSES.map((boss) => boss.projectileTexture)).toEqual(["slime-shot", "magma-shot", "cyber-shot"]);
   });
 });

@@ -39,8 +39,6 @@ export const BOSSES: BossConfig[] = [
     color: 0x46f27d,
     accent: 0xf8d648,
     projectileTexture: "slime-shot",
-    fireRateMs: 760,
-    projectileSpeed: 620,
     patterns: ["single_slime_shot", "triple_slime_spread", "slime_wave"]
   },
   {
@@ -52,8 +50,6 @@ export const BOSSES: BossConfig[] = [
     color: 0xff7a2f,
     accent: 0xffd166,
     projectileTexture: "magma-shot",
-    fireRateMs: 600,
-    projectileSpeed: 760,
     patterns: ["magma_drop", "double_fireball", "floor_burst"]
   },
   {
@@ -65,8 +61,6 @@ export const BOSSES: BossConfig[] = [
     color: 0x48d6ff,
     accent: 0xf854ff,
     projectileTexture: "cyber-shot",
-    fireRateMs: 460,
-    projectileSpeed: 920,
     patterns: ["laser_pearl", "zigzag_bytes", "shield_phase"],
     shieldAt: 0.5
   }

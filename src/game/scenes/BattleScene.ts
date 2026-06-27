@@ -9,7 +9,15 @@ import {
   POWER_DAMAGE,
   SCENE_KEYS
 } from "../constants";
-import { getPowerVisualProfile, shouldBossFire, type PowerVisualProfile } from "../systems/BattleRules";
+import {
+  BOSS_AIMED_TRAVEL_MS,
+  BOSS_AIMED_VOLLEY_INTERVAL_MS,
+  createAimedBossVolley,
+  getPowerVisualProfile,
+  shouldBossFire,
+  type AimedProjectilePlan,
+  type PowerVisualProfile
+} from "../systems/BattleRules";
 import { generateMathQuestion } from "../systems/MathQuestionSystem";
 import { RENDER_LAYERS } from "../systems/RenderLayers";
 import { showDamageNumber } from "../ui/DamageNumber";
@@ -53,6 +61,7 @@ export class BattleScene extends Phaser.Scene {
   private dashUntil = 0;
   private dashReadyAt = 0;
   private nextBossShotAt = 0;
+  private bossVolleyIndex = 0;
   private gameEnded = false;
   private powerReadyAt: Record<PowerLevel, number> = { 1: 0, 2: 0, 3: 0 };
   private statusText!: Phaser.GameObjects.Text;
@@ -77,6 +86,7 @@ export class BattleScene extends Phaser.Scene {
     this.dashUntil = 0;
     this.dashReadyAt = 0;
     this.nextBossShotAt = 0;
+    this.bossVolleyIndex = 0;
     this.gameEnded = false;
     this.powerReadyAt = { 1: 0, 2: 0, 3: 0 };
   }
@@ -234,7 +244,7 @@ export class BattleScene extends Phaser.Scene {
     }
 
     this.fireBossPattern();
-    this.nextBossShotAt = time + this.boss.fireRateMs;
+    this.nextBossShotAt = time + BOSS_AIMED_VOLLEY_INTERVAL_MS;
   }
 
   private updateProjectiles() {
@@ -341,28 +351,24 @@ export class BattleScene extends Phaser.Scene {
   }
 
   private fireBossPattern() {
-    if (this.boss.id === "slime_king") {
-      const spread = this.bossHp < this.boss.hp * 0.45 ? [-45, 0, 45] : [0];
-      spread.forEach((offset) => this.spawnBossProjectile(this.bossSprite.x + offset, this.bossSprite.y + 44, offset * 0.7));
-      return;
-    }
-
-    if (this.boss.id === "magma_ogre") {
-      const x = Phaser.Math.Between(70, 320);
-      this.spawnBossProjectile(x, this.bossSprite.y + 44, Phaser.Math.Between(-22, 22));
-      this.time.delayedCall(260, () => this.spawnBossProjectile(390 - x, this.bossSprite.y + 44, Phaser.Math.Between(-18, 18)));
-      return;
-    }
-
-    const side = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
-    this.spawnBossProjectile(this.bossSprite.x, this.bossSprite.y + 44, side * 90);
-    this.time.delayedCall(180, () => this.spawnBossProjectile(this.bossSprite.x, this.bossSprite.y + 44, side * -90));
+    const volley = createAimedBossVolley({
+      volleyIndex: this.bossVolleyIndex,
+      bossX: this.bossSprite.x,
+      bossY: this.bossSprite.y,
+      targetX: this.player.x,
+      targetY: this.player.y,
+      travelMs: BOSS_AIMED_TRAVEL_MS
+    });
+    this.bossVolleyIndex += 1;
+    volley.forEach((projectile, index) => {
+      this.time.delayedCall(index * 80, () => this.spawnAimedBossProjectile(projectile));
+    });
   }
 
-  private spawnBossProjectile(x: number, y: number, velocityX: number) {
-    const shot = this.physics.add.image(x, y, this.boss.projectileTexture).setDepth(RENDER_LAYERS.bossProjectile);
+  private spawnAimedBossProjectile(projectile: AimedProjectilePlan) {
+    const shot = this.physics.add.image(projectile.startX, projectile.startY, this.boss.projectileTexture).setDepth(RENDER_LAYERS.bossProjectile);
     shot.setBlendMode(Phaser.BlendModes.ADD);
-    shot.setVelocity(velocityX, this.boss.projectileSpeed);
+    shot.setVelocity(projectile.velocityX, projectile.velocityY);
     shot.setAngularVelocity(Phaser.Math.Between(-240, 240));
     shot.body?.setSize(22, 22, true);
     this.bossProjectiles.add(shot);

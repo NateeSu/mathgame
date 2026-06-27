@@ -1,5 +1,7 @@
 import { describe, expect, test } from "vitest";
 import {
+  createAimedBossVolley,
+  calculateAimedProjectileVelocity,
   getPowerVisualProfile,
   shouldBossFire,
   type BossFireState
@@ -38,5 +40,45 @@ describe("BattleRules", () => {
     expect(level2.beamCount).toBeGreaterThan(level1.beamCount);
     expect(level3.beamCount).toBeGreaterThan(level2.beamCount);
     expect(level3.shakeIntensity).toBeGreaterThan(level1.shakeIntensity);
+  });
+
+  test("aimed projectile reaches the player after the requested travel time", () => {
+    const velocity = calculateAimedProjectileVelocity({
+      startX: 80,
+      startY: 240,
+      targetX: 220,
+      targetY: 640,
+      travelMs: 1_000
+    });
+
+    expect(80 + velocity.velocityX).toBe(220);
+    expect(240 + velocity.velocityY).toBe(640);
+  });
+
+  test("aimed boss volleys approach the player from changing directions", () => {
+    const first = createAimedBossVolley({
+      volleyIndex: 0,
+      bossX: 195,
+      bossY: 236,
+      targetX: 190,
+      targetY: 636,
+      travelMs: 1_000
+    });
+    const second = createAimedBossVolley({
+      volleyIndex: 1,
+      bossX: 195,
+      bossY: 236,
+      targetX: 190,
+      targetY: 636,
+      travelMs: 1_000
+    });
+
+    expect(first).toHaveLength(3);
+    expect(second).toHaveLength(3);
+    expect(first.map((shot) => shot.startX)).not.toEqual(second.map((shot) => shot.startX));
+    first.forEach((shot) => {
+      expect(Math.round(shot.startX + shot.velocityX)).toBe(190);
+      expect(Math.round(shot.startY + shot.velocityY)).toBe(636);
+    });
   });
 });

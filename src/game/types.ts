@@ -11,8 +11,6 @@ export type BossConfig = {
   color: number;
   accent: number;
   projectileTexture: string;
-  fireRateMs: number;
-  projectileSpeed: number;
   patterns: string[];
   shieldAt?: number;
 };

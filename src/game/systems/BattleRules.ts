@@ -22,9 +22,89 @@ export type PowerVisualProfile = {
   burstParticles: number;
 };
 
+export type AimedProjectileInput = {
+  startX: number;
+  startY: number;
+  targetX: number;
+  targetY: number;
+  travelMs: number;
+};
+
+export type AimedProjectilePlan = {
+  startX: number;
+  startY: number;
+  velocityX: number;
+  velocityY: number;
+};
+
+export type AimedBossVolleyInput = {
+  volleyIndex: number;
+  bossX: number;
+  bossY: number;
+  targetX: number;
+  targetY: number;
+  travelMs: number;
+};
+
+export const BOSS_AIMED_TRAVEL_MS = 1_000;
+export const BOSS_AIMED_VOLLEY_INTERVAL_MS = 1_000;
+
 export const shouldBossFire = (state: BossFireState): boolean => {
   if (state.gameEnded) return false;
   return state.nowMs >= state.nextShotAtMs;
+};
+
+export const calculateAimedProjectileVelocity = ({
+  startX,
+  startY,
+  targetX,
+  targetY,
+  travelMs
+}: AimedProjectileInput): Pick<AimedProjectilePlan, "velocityX" | "velocityY"> => {
+  const travelSeconds = travelMs / 1_000;
+  return {
+    velocityX: (targetX - startX) / travelSeconds,
+    velocityY: (targetY - startY) / travelSeconds
+  };
+};
+
+export const createAimedBossVolley = ({
+  volleyIndex,
+  bossX,
+  bossY,
+  targetX,
+  targetY,
+  travelMs
+}: AimedBossVolleyInput): AimedProjectilePlan[] => {
+  const directionSets = [
+    [
+      { x: 0, y: 58 },
+      { x: -122, y: 92 },
+      { x: 122, y: 92 }
+    ],
+    [
+      { x: -148, y: 36 },
+      { x: 0, y: 74 },
+      { x: 148, y: 36 }
+    ],
+    [
+      { x: -92, y: 28 },
+      { x: 92, y: 28 },
+      { x: 0, y: 118 }
+    ]
+  ];
+  const offsets = directionSets[volleyIndex % directionSets.length];
+
+  return offsets.map((offset) => {
+    const startX = bossX + offset.x;
+    const startY = bossY + offset.y;
+    const velocity = calculateAimedProjectileVelocity({ startX, startY, targetX, targetY, travelMs });
+    return {
+      startX,
+      startY,
+      ...velocity
+    };
+  });
 };
 
 export const getPowerVisualProfile = (level: PowerLevel): PowerVisualProfile => {
